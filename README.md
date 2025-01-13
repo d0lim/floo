@@ -46,7 +46,7 @@ Predicates determine if a Route matches a given request. Examples include:
 - **PathPrefixPredicate**: Matches paths that begin with a given prefix.
 - **MethodPredicate**: Matches a specific HTTP method (GET, POST, etc.).
 
-### Request Filters (WIP)
+### Request Filters
 
 **Request Filters** (`RequestFilter`) operate on the incoming request **before** it’s sent to the Upstream. Typical use cases:
 
@@ -54,7 +54,7 @@ Predicates determine if a Route matches a given request. Examples include:
 - Rewriting path segments (e.g., removing `"/api"` prefix).
 - Logging inbound request details.
 
-### Response Filters (WIP)
+### Response Filters
 
 **Response Filters** (`ResponseFilter`) run **after** receiving a response from the Upstream. Potential operations include:
 
