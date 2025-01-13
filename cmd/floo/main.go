@@ -1,16 +1,15 @@
 package main
 
 import (
-	"floo/internal/reverseproxy"
 	"fmt"
+	"github.com/d0lim/floo/internal/filter"
+	"github.com/d0lim/floo/internal/gateway"
+	"github.com/d0lim/floo/internal/predicate"
+	"github.com/d0lim/floo/internal/reverseproxy"
 	"log"
 	"regexp"
 
 	"github.com/gofiber/fiber/v2"
-
-	"floo/internal/filter"
-	"floo/internal/gateway"
-	"floo/internal/predicate"
 )
 
 func main() {

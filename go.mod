@@ -1,4 +1,4 @@
-module floo
+module github.com/d0lim/floo
 
 go 1.23
 
