@@ -1,0 +1,6 @@
+### GET request to json placeholder
+GET http://localhost:8080/placeholder/todos/1
+Accept: application/json
+Accept-Charset: utf-8
+
+###
