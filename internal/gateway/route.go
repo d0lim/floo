@@ -7,9 +7,10 @@ import (
 
 // Route contains Predicates, Filters, and Upstream.
 type Route struct {
-	Predicates []Predicate
-	Filters    []Filter
-	Upstream   string // Target for Reverse Proxy (if empty, process locally)
+	Predicates      []Predicate
+	RequestFilters  []RequestFilter
+	ResponseFilters []ResponseFilter
+	Upstream        string
 }
 
 // Match checks if this Route matches the current request.
@@ -22,20 +23,27 @@ func (r *Route) Match(c *fiber.Ctx) bool {
 	return true
 }
 
-// Serve applies filters, then processes locally or proxies to Upstream.
+// Serve applies filters, then processes proxies to Upstream.
 func (r *Route) Serve(c *fiber.Ctx, proxy ReverseProxy) error {
-	// 1) Apply all Filters.
-	for _, filter := range r.Filters {
-		if err := filter.Apply(c); err != nil {
+	// 1) Apply all RequestFilters
+	for _, rf := range r.RequestFilters {
+		if err := rf.OnRequest(c); err != nil {
 			return err
 		}
 	}
 
-	// 2) Reverse Proxy if Upstream is set.
+	// 2) Reverse Proxy if Upstream is set
 	if r.Upstream != "" && proxy != nil {
 		return proxy.Proxy(c, r.Upstream)
 	}
 
-	// 3) Process locally
+	// 3) Apply all ResponseFilters
+	for _, rf := range r.ResponseFilters {
+		if err := rf.OnResponse(c); err != nil {
+			return err
+		}
+	}
+
+	// 4) Return 404 when no matching route is found
 	return fiber.NewError(http.StatusNotFound, "No matching route found")
 }

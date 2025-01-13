@@ -24,9 +24,9 @@ func main() {
 				Predicates: []gateway.Predicate{
 					predicate.PathPrefixPredicate{Prefix: "/placeholder"},
 				},
-				Filters: []gateway.Filter{
-					filter.AddHeaderFilter{Key: "X-Proxy", Value: "Go-Floo-Gateway"},
-					filter.RewritePathRegexFilter{Pattern: regexp.MustCompile(`^/placeholder/(.*)`),
+				RequestFilters: []gateway.RequestFilter{
+					filter.AddHeaderRequestFilter{Key: "X-Proxy", Value: "Go-Floo-Gateway"},
+					filter.RewritePathRequestFilter{Pattern: regexp.MustCompile(`^/placeholder/(.*)`),
 						Replacement: "/$1"},
 				},
 				Upstream: "https://jsonplaceholder.typicode.com",
