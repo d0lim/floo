@@ -15,9 +15,6 @@ func (p *NetHTTPProxy) Proxy(c *fiber.Ctx, upstream string) error {
 	// Simple concatenation of Path (adjust as needed for actual use case)
 	targetURL := fmt.Sprintf("%s%s", upstream, c.Request().URI().Path())
 
-	fmt.Println("Proxying to", targetURL)
-	fmt.Println("Uri", c.Request().URI())
-
 	// 1) Create a new HTTP request (including Body)
 	req, err := http.NewRequest(c.Method(), targetURL, bytes.NewReader(c.Body()))
 	if err != nil {
