@@ -95,10 +95,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/d0lim/floo/internal/filter"
-	"github.com/d0lim/floo/internal/gateway"
-	"github.com/d0lim/floo/internal/predicate"
-	"github.com/d0lim/floo/internal/reverseproxy"
+	"github.com/d0lim/floo/pkg/filter"
+	"github.com/d0lim/floo/pkg/gateway"
+	"github.com/d0lim/floo/pkg/predicate"
+	"github.com/d0lim/floo/pkg/reverseproxy"
 	"log"
 	"regexp"
 
