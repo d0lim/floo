@@ -28,6 +28,9 @@ func TestProxyLogger(t *testing.T) {
 	// 기본 로그 설정 초기화
 	ConfigureLogger(LogFlags{}, "") // 타임스탬프 제거
 
+	// 테스트를 위해 디버그 레벨 활성화
+	SetLogLevel(DebugLevel)
+
 	// 파이버 앱 생성
 	app := fiber.New()
 
@@ -91,14 +94,16 @@ func TestProxyLogger(t *testing.T) {
 	logs := logBuf.String()
 	t.Logf("로그 출력: %s", logs)
 
-	// 필요한 로그 항목이 있는지 확인
+	// 필요한 로그 항목이 있는지 확인 - 새로운 로그 형식에 맞춤
 	requiredLogItems := []string{
-		"[요청] 매칭 경로: /test",
-		"메서드: GET",
+		"[프록시][INFO] 요청: 경로=/test",
+		"메서드=GET",
+		"[프록시][DEBUG] 요청 헤더",
 		"X-Test-Header",
-		"[프록시] 대상 URL: https://example.com/test",
-		"[응답] 상태 코드: 200",
-		"[응답] 바디:",
+		"[프록시][DEBUG] 대상 URL: https://example.com/test",
+		"[프록시][INFO] 프록시 요청 전송: GET https://example.com/test",
+		"응답 수신: 상태=200",
+		"[프록시][DEBUG] 응답 바디",
 	}
 
 	for _, item := range requiredLogItems {
@@ -117,6 +122,9 @@ func TestProxyLoggerWithJSONPlaceholder(t *testing.T) {
 
 	// 기본 로그 설정 초기화
 	ConfigureLogger(LogFlags{}, "") // 타임스탬프 제거
+
+	// 테스트를 위해 디버그 레벨 활성화
+	SetLogLevel(DebugLevel)
 
 	// 파이버 앱 생성
 	app := fiber.New()
@@ -182,12 +190,14 @@ func TestProxyLoggerWithJSONPlaceholder(t *testing.T) {
 	logs := logBuf.String()
 	t.Logf("로그 출력: %s", logs)
 
-	// 필요한 로그 항목이 있는지 확인
+	// 필요한 로그 항목이 있는지 확인 - 새로운 로그 형식에 맞춤
 	requiredLogItems := []string{
-		"[요청] 매칭 경로: /todos/1",
-		"메서드: GET",
-		"[프록시] 대상 URL: https://jsonplaceholder.typicode.com/todos/1",
-		"[응답] 상태 코드: 200",
+		"[프록시][INFO] 요청: 경로=/todos/1",
+		"메서드=GET",
+		"[프록시][DEBUG] 대상 URL: https://jsonplaceholder.typicode.com/todos/1",
+		"[프록시][INFO] 프록시 요청 전송",
+		"응답 수신: 상태=200",
+		"delectus aut autem",
 	}
 
 	for _, item := range requiredLogItems {

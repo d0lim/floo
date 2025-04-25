@@ -41,6 +41,9 @@ func TestGatewayLogger(t *testing.T) {
 	// 기본 로그 설정 초기화
 	ConfigureLogger(LogFlags{}, "") // 타임스탬프 제거
 
+	// 테스트를 위해 디버그 레벨 활성화
+	SetLogLevel(DebugLevel)
+
 	// 파이버 앱 생성
 	app := fiber.New()
 
@@ -103,18 +106,17 @@ func TestGatewayLogger(t *testing.T) {
 	logs := logBuf.String()
 	t.Logf("로그 출력: %s", logs)
 
-	// 필요한 로그 항목이 있는지 확인
+	// 필요한 로그 항목이 있는지 확인 - 새로운 로그 형식에 맞춤
 	requiredLogItems := []string{
-		"[게이트웨이] 요청 수신: 경로=/api/test",
-		"[게이트웨이] 라우트[0] 매칭 시작",
+		"[게이트웨이][INFO] 요청 수신: 경로=/api/test",
+		"[게이트웨이][DEBUG] 라우트[0] 매칭 시작",
 		"Predicate[0]",
 		"Predicate[1]",
-		"[게이트웨이] 라우트[0] 매칭 성공",
-		"[게이트웨이] 요청 필터 적용",
-		"[게이트웨이] 프록시 호출: 업스트림=https://example.com",
-		"[게이트웨이] 프록시 호출 성공",
-		"[게이트웨이] 라우트[0] 처리 완료",
-		"[게이트웨이] 요청 처리 완료",
+		"[게이트웨이][INFO] 라우트[0] 매칭 성공",
+		"[필터][INFO] 요청 필터[0]",
+		"[프록시][INFO] 프록시 호출",
+		"성공 (상태 코드=200)",
+		"[게이트웨이][INFO] 요청 처리 완료",
 	}
 
 	for _, item := range requiredLogItems {

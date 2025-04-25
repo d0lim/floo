@@ -15,8 +15,10 @@ import (
 func main() {
 	// 로그 설정
 	log.ConfigureLogger(log.LogFlags{Time: true, File: true}, "[FLOO] ")
-	logf := log.GetLogger()
-	logf.Println("전체 로깅 예제 애플리케이션을 시작합니다...")
+	log.SetLogLevel(log.DebugLevel) // 디버그 모드 활성화
+	logger := log.GetLogger()
+
+	logger.Info(log.GatewayComponent, "전체 로깅 예제 애플리케이션을 시작합니다...")
 
 	app := fiber.New()
 
@@ -68,7 +70,7 @@ func main() {
 
 	// 테스트용 핑 엔드포인트
 	app.Get("/api/ping", func(c *fiber.Ctx) error {
-		logf.Println("핑 요청 수신")
+		logger.Debug(log.GatewayComponent, "핑 요청 수신")
 		return c.SendString("OK")
 	})
 
@@ -76,10 +78,10 @@ func main() {
 	app.All("/*", loggingGateway.Handle)
 
 	port := 8083
-	logf.Printf("전체 로깅 게이트웨이가 포트 %d에서 시작됩니다", port)
-	logf.Printf("테스트 URL 예시:")
-	logf.Printf("  - http://localhost:%d/todos/1        (GET만 허용)", port)
-	logf.Printf("  - http://localhost:%d/posts/1        (모든 메서드 허용)", port)
-	logf.Printf("  - http://localhost:%d/echo/get?foo=bar", port)
-	logf.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
+	logger.Info(log.GatewayComponent, "전체 로깅 게이트웨이가 포트 %d에서 시작됩니다", port)
+	logger.Info(log.GatewayComponent, "테스트 URL 예시:")
+	logger.Info(log.GatewayComponent, "  - http://localhost:%d/todos/1        (GET만 허용)", port)
+	logger.Info(log.GatewayComponent, "  - http://localhost:%d/posts/1        (모든 메서드 허용)", port)
+	logger.Info(log.GatewayComponent, "  - http://localhost:%d/echo/get?foo=bar", port)
+	app.Listen(fmt.Sprintf(":%d", port))
 }
