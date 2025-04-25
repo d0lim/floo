@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"regexp"
+
 	"github.com/d0lim/floo/pkg/filter"
 	"github.com/d0lim/floo/pkg/gateway"
 	"github.com/d0lim/floo/pkg/predicate"
 	"github.com/d0lim/floo/pkg/reverseproxy"
-	"log"
-	"regexp"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,7 +16,7 @@ import (
 func main() {
 	app := fiber.New()
 
-	p := &reverseproxy.NetHTTPProxy{}
+	p := reverseproxy.NewNetHTTPProxy()
 
 	gw := gateway.Gateway{
 		ReverseProxy: p,
