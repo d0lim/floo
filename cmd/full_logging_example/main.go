@@ -13,20 +13,20 @@ import (
 )
 
 func main() {
-	// 로그 설정
+	// Log configuration
 	log.ConfigureLogger(log.LogFlags{Time: true, File: true}, "[FLOO] ")
-	log.SetLogLevel(log.DebugLevel) // 디버그 모드 활성화
+	log.SetLogLevel(log.DebugLevel) // Enable debug mode
 	logger := log.GetLogger()
 
-	logger.Info(log.GatewayComponent, "전체 로깅 예제 애플리케이션을 시작합니다...")
+	logger.Info(log.GatewayComponent, "Starting full logging example application...")
 
 	app := fiber.New()
 
-	// 기본 프록시 생성 및 로깅 프록시로 래핑
+	// Create base proxy and wrap with logging proxy
 	baseProxy := reverseproxy.NewNetHTTPProxy()
 	loggingProxy := log.NewProxyLogger(baseProxy)
 
-	// 기본 게이트웨이 생성
+	// Create base gateway
 	baseGateway := gateway.Gateway{
 		ReverseProxy: loggingProxy,
 		Routes: []gateway.Route{
@@ -54,7 +54,7 @@ func main() {
 					predicate.PathPrefixPredicate{Prefix: "/echo"},
 				},
 				RequestFilters: []gateway.RequestFilter{
-					filter.AddHeaderRequestFilter{Key: "X-Echo-Test", Value: "로깅 예제"},
+					filter.AddHeaderRequestFilter{Key: "X-Echo-Test", Value: "Logging Example"},
 					filter.RewritePathRequestFilter{
 						Pattern:     regexp.MustCompile(`^/echo/(.*)`),
 						Replacement: "/$1",
@@ -65,23 +65,23 @@ func main() {
 		},
 	}
 
-	// 로깅 게이트웨이로 래핑
+	// Wrap with logging gateway
 	loggingGateway := log.NewGatewayLogger(baseGateway)
 
-	// 테스트용 핑 엔드포인트
+	// Test ping endpoint
 	app.Get("/api/ping", func(c *fiber.Ctx) error {
-		logger.Debug(log.GatewayComponent, "핑 요청 수신")
+		logger.Debug(log.GatewayComponent, "Ping request received")
 		return c.SendString("OK")
 	})
 
-	// 모든 다른 경로는 게이트웨이로 라우팅
+	// Route all other paths to the gateway
 	app.All("/*", loggingGateway.Handle)
 
 	port := 8083
-	logger.Info(log.GatewayComponent, "전체 로깅 게이트웨이가 포트 %d에서 시작됩니다", port)
-	logger.Info(log.GatewayComponent, "테스트 URL 예시:")
-	logger.Info(log.GatewayComponent, "  - http://localhost:%d/todos/1        (GET만 허용)", port)
-	logger.Info(log.GatewayComponent, "  - http://localhost:%d/posts/1        (모든 메서드 허용)", port)
+	logger.Info(log.GatewayComponent, "Full logging gateway starting on port %d", port)
+	logger.Info(log.GatewayComponent, "Test URL examples:")
+	logger.Info(log.GatewayComponent, "  - http://localhost:%d/todos/1        (GET only)", port)
+	logger.Info(log.GatewayComponent, "  - http://localhost:%d/posts/1        (All methods allowed)", port)
 	logger.Info(log.GatewayComponent, "  - http://localhost:%d/echo/get?foo=bar", port)
 	app.Listen(fmt.Sprintf(":%d", port))
 }

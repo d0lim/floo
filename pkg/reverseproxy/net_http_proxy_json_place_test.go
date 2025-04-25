@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// TodoResponse는 jsonplaceholder의 Todo 응답 구조체
+// TodoResponse is a struct for jsonplaceholder Todo response
 type TodoResponse struct {
 	UserID    int    `json:"userId"`
 	ID        int    `json:"id"`
@@ -18,56 +18,56 @@ type TodoResponse struct {
 }
 
 func TestNetHTTPProxyWithJSONPlaceholder(t *testing.T) {
-	// 파이버 앱 생성
+	// Create fiber app
 	app := fiber.New()
 
-	// 실제 NetHTTPProxy 생성 (실제 HTTP 요청 사용)
+	// Create actual NetHTTPProxy (using real HTTP requests)
 	proxy := NewNetHTTPProxy()
 
-	// 테스트 경로 추가
+	// Add test route
 	app.Get("/todos/:id", func(c *fiber.Ctx) error {
 		return proxy.Proxy(c, "https://jsonplaceholder.typicode.com")
 	})
 
-	// 테스트 요청 생성
+	// Create test request
 	req := httptest.NewRequest(http.MethodGet, "/todos/1", nil)
 	resp, err := app.Test(req)
 	if err != nil {
-		t.Fatalf("요청 테스트 실패: %v", err)
+		t.Fatalf("Request test failed: %v", err)
 	}
 
-	// 상태 코드 확인
+	// Check status code
 	if resp.StatusCode != 200 {
-		t.Errorf("상태 코드가 200이어야 하는데, %d를 받았습니다", resp.StatusCode)
+		t.Errorf("Status code should be 200, but got %d", resp.StatusCode)
 	}
 
-	// JSON 응답 파싱
+	// Parse JSON response
 	var todo TodoResponse
 	err = json.NewDecoder(resp.Body).Decode(&todo)
 	if err != nil {
-		t.Fatalf("JSON 응답 파싱 실패: %v", err)
+		t.Fatalf("Failed to parse JSON response: %v", err)
 	}
 
-	// 예상 응답 필드 검증
+	// Validate expected response fields
 	if todo.UserID != 1 {
-		t.Errorf("UserID는 1이어야 하는데, %d를 받았습니다", todo.UserID)
+		t.Errorf("UserID should be 1, but got %d", todo.UserID)
 	}
 	if todo.ID != 1 {
-		t.Errorf("ID는 1이어야 하는데, %d를 받았습니다", todo.ID)
+		t.Errorf("ID should be 1, but got %d", todo.ID)
 	}
 	if todo.Title != "delectus aut autem" {
-		t.Errorf("제목이 'delectus aut autem'이어야 하는데, '%s'를 받았습니다", todo.Title)
+		t.Errorf("Title should be 'delectus aut autem', but got '%s'", todo.Title)
 	}
 	if todo.Completed != false {
-		t.Errorf("Completed는 false여야 하는데, %t를 받았습니다", todo.Completed)
+		t.Errorf("Completed should be false, but got %t", todo.Completed)
 	}
 }
 
 func TestNetHTTPProxyWithMockJSONPlaceholder(t *testing.T) {
-	// 파이버 앱 생성
+	// Create fiber app
 	app := fiber.New()
 
-	// 목업 응답 준비
+	// Prepare mock response
 	mockClient := &MockHTTPClient{
 		StatusCode: 200,
 		RespHeaders: map[string][]string{
@@ -76,46 +76,46 @@ func TestNetHTTPProxyWithMockJSONPlaceholder(t *testing.T) {
 		RespBody: []byte(`{"userId": 1, "id": 1, "title": "delectus aut autem", "completed": false}`),
 	}
 
-	// 목업 클라이언트로 프록시 생성
+	// Create proxy with mock client
 	proxy := &NetHTTPProxy{
 		Client: mockClient,
 	}
 
-	// 테스트 경로 추가
+	// Add test route
 	app.Get("/todos/:id", func(c *fiber.Ctx) error {
 		return proxy.Proxy(c, "https://jsonplaceholder.typicode.com")
 	})
 
-	// 테스트 요청 생성
+	// Create test request
 	req := httptest.NewRequest(http.MethodGet, "/todos/1", nil)
 	resp, err := app.Test(req)
 	if err != nil {
-		t.Fatalf("요청 테스트 실패: %v", err)
+		t.Fatalf("Request test failed: %v", err)
 	}
 
-	// 상태 코드 확인
+	// Check status code
 	if resp.StatusCode != 200 {
-		t.Errorf("상태 코드가 200이어야 하는데, %d를 받았습니다", resp.StatusCode)
+		t.Errorf("Status code should be 200, but got %d", resp.StatusCode)
 	}
 
-	// JSON 응답 파싱
+	// Parse JSON response
 	var todo TodoResponse
 	err = json.NewDecoder(resp.Body).Decode(&todo)
 	if err != nil {
-		t.Fatalf("JSON 응답 파싱 실패: %v", err)
+		t.Fatalf("Failed to parse JSON response: %v", err)
 	}
 
-	// 예상 응답 필드 검증
+	// Validate expected response fields
 	if todo.UserID != 1 {
-		t.Errorf("UserID는 1이어야 하는데, %d를 받았습니다", todo.UserID)
+		t.Errorf("UserID should be 1, but got %d", todo.UserID)
 	}
 	if todo.ID != 1 {
-		t.Errorf("ID는 1이어야 하는데, %d를 받았습니다", todo.ID)
+		t.Errorf("ID should be 1, but got %d", todo.ID)
 	}
 	if todo.Title != "delectus aut autem" {
-		t.Errorf("제목이 'delectus aut autem'이어야 하는데, '%s'를 받았습니다", todo.Title)
+		t.Errorf("Title should be 'delectus aut autem', but got '%s'", todo.Title)
 	}
 	if todo.Completed != false {
-		t.Errorf("Completed는 false여야 하는데, %t를 받았습니다", todo.Completed)
+		t.Errorf("Completed should be false, but got %t", todo.Completed)
 	}
 }

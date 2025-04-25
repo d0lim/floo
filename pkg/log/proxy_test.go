@@ -11,7 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// TodoResponse는 jsonplaceholder의 Todo 응답 구조체
+// TodoResponse is a struct for jsonplaceholder Todo response
 type TodoResponse struct {
 	UserID    int    `json:"userId"`
 	ID        int    `json:"id"`
@@ -20,116 +20,116 @@ type TodoResponse struct {
 }
 
 func TestProxyLogger(t *testing.T) {
-	// 로그 캡처 설정
+	// Setup log capture
 	logBuf := NewBuffer()
 	restore := CaptureLogsToBuffer(logBuf)
 	defer restore()
 
-	// 기본 로그 설정 초기화
-	ConfigureLogger(LogFlags{}, "") // 타임스탬프 제거
+	// Initialize basic log configuration
+	ConfigureLogger(LogFlags{}, "") // Remove timestamp
 
-	// 테스트를 위해 디버그 레벨 활성화
+	// Enable debug level for testing
 	SetLogLevel(DebugLevel)
 
-	// 파이버 앱 생성
+	// Create fiber app
 	app := fiber.New()
 
-	// 목업 클라이언트 설정
+	// Setup mock client
 	mockClient := &MockHTTPClient{
 		StatusCode:  200,
 		RespHeaders: map[string][]string{"Content-Type": {"application/json"}},
-		RespBody:    []byte(`{"userId": 1, "id": 1, "title": "테스트 제목", "completed": false}`),
+		RespBody:    []byte(`{"userId": 1, "id": 1, "title": "Test Title", "completed": false}`),
 	}
 
-	// 베이스 프록시
+	// Base proxy
 	baseProxy := &reverseproxy.NetHTTPProxy{
 		Client: mockClient,
 	}
 
-	// 로깅 프록시로 래핑
+	// Wrap with logging proxy
 	loggingProxy := NewProxyLogger(baseProxy)
 
-	// 테스트 경로 추가
+	// Add test route
 	app.Get("/test", func(c *fiber.Ctx) error {
 		return loggingProxy.Proxy(c, "https://example.com")
 	})
 
-	// 테스트 요청 생성
+	// Create test request
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
-	req.Header.Set("X-Test-Header", "테스트 값")
+	req.Header.Set("X-Test-Header", "Test Value")
 
-	// 요청 실행
+	// Execute request
 	resp, err := app.Test(req)
 	if err != nil {
-		t.Fatalf("요청 테스트 실패: %v", err)
+		t.Fatalf("Request test failed: %v", err)
 	}
 
-	// 응답 확인
+	// Check response
 	if resp.StatusCode != 200 {
-		t.Errorf("상태 코드가 200이어야 하는데, %d를 받았습니다", resp.StatusCode)
+		t.Errorf("Status code should be 200, but got %d", resp.StatusCode)
 	}
 
-	// JSON 응답 파싱
+	// Parse JSON response
 	var todo TodoResponse
 	err = json.NewDecoder(resp.Body).Decode(&todo)
 	if err != nil {
-		t.Fatalf("JSON 응답 파싱 실패: %v", err)
+		t.Fatalf("Failed to parse JSON response: %v", err)
 	}
 
-	// 예상 응답 필드 검증
+	// Validate expected response fields
 	if todo.UserID != 1 {
-		t.Errorf("UserID는 1이어야 하는데, %d를 받았습니다", todo.UserID)
+		t.Errorf("UserID should be 1, but got %d", todo.UserID)
 	}
 	if todo.ID != 1 {
-		t.Errorf("ID는 1이어야 하는데, %d를 받았습니다", todo.ID)
+		t.Errorf("ID should be 1, but got %d", todo.ID)
 	}
-	if todo.Title != "테스트 제목" {
-		t.Errorf("제목이 '테스트 제목'이어야 하는데, '%s'를 받았습니다", todo.Title)
+	if todo.Title != "Test Title" {
+		t.Errorf("Title should be 'Test Title', but got '%s'", todo.Title)
 	}
 	if todo.Completed != false {
-		t.Errorf("Completed는 false여야 하는데, %t를 받았습니다", todo.Completed)
+		t.Errorf("Completed should be false, but got %t", todo.Completed)
 	}
 
-	// 로그 확인
+	// Check logs
 	logs := logBuf.String()
-	t.Logf("로그 출력: %s", logs)
+	t.Logf("Log output: %s", logs)
 
-	// 필요한 로그 항목이 있는지 확인 - 새로운 로그 형식에 맞춤
+	// Verify required log items are present - adjusted for new log format
 	requiredLogItems := []string{
-		"[프록시][INFO] 요청: 경로=/test",
-		"메서드=GET",
-		"[프록시][DEBUG] 요청 헤더",
+		"[Proxy][INFO] Request: path=/test",
+		"method=GET",
+		"[Proxy][DEBUG] Request headers",
 		"X-Test-Header",
-		"[프록시][DEBUG] 대상 URL: https://example.com/test",
-		"[프록시][INFO] 프록시 요청 전송: GET https://example.com/test",
-		"응답 수신: 상태=200",
-		"[프록시][DEBUG] 응답 바디",
+		"[Proxy][DEBUG] Target URL: https://example.com/test",
+		"[Proxy][INFO] Sending proxy request: GET https://example.com/test",
+		"Response received: status=200",
+		"[Proxy][DEBUG] Response body",
 	}
 
 	for _, item := range requiredLogItems {
 		if !strings.Contains(logs, item) {
-			t.Errorf("로그에 '%s' 항목이 없습니다", item)
+			t.Errorf("Log does not contain '%s' item", item)
 		}
 	}
 }
 
 func TestProxyLoggerWithJSONPlaceholder(t *testing.T) {
-	// 실제 API를 호출하는 대신 Mock을 사용
-	// 로그 캡처 설정
+	// Use Mock instead of calling actual API
+	// Setup log capture
 	logBuf := NewBuffer()
 	restore := CaptureLogsToBuffer(logBuf)
 	defer restore()
 
-	// 기본 로그 설정 초기화
-	ConfigureLogger(LogFlags{}, "") // 타임스탬프 제거
+	// Initialize basic log configuration
+	ConfigureLogger(LogFlags{}, "") // Remove timestamp
 
-	// 테스트를 위해 디버그 레벨 활성화
+	// Enable debug level for testing
 	SetLogLevel(DebugLevel)
 
-	// 파이버 앱 생성
+	// Create fiber app
 	app := fiber.New()
 
-	// JSONPlaceholder API 응답을 시뮬레이션하는 목업 클라이언트
+	// Mock client that simulates JSONPlaceholder API response
 	mockClient := &MockHTTPClient{
 		StatusCode: 200,
 		RespHeaders: map[string][]string{
@@ -138,71 +138,71 @@ func TestProxyLoggerWithJSONPlaceholder(t *testing.T) {
 		RespBody: []byte(`{"userId": 1, "id": 1, "title": "delectus aut autem", "completed": false}`),
 	}
 
-	// 베이스 프록시를 Mock 클라이언트와 함께 생성
+	// Create base proxy with Mock client
 	baseProxy := &reverseproxy.NetHTTPProxy{
 		Client: mockClient,
 	}
 
-	// 로깅 프록시로 래핑
+	// Wrap with logging proxy
 	loggingProxy := NewProxyLogger(baseProxy)
 
-	// 테스트 경로 추가
+	// Add test route
 	app.Get("/todos/:id", func(c *fiber.Ctx) error {
 		return loggingProxy.Proxy(c, "https://jsonplaceholder.typicode.com")
 	})
 
-	// 테스트 요청 생성
+	// Create test request
 	req := httptest.NewRequest(http.MethodGet, "/todos/1", nil)
 
-	// 요청 실행
+	// Execute request
 	resp, err := app.Test(req)
 	if err != nil {
-		t.Fatalf("요청 테스트 실패: %v", err)
+		t.Fatalf("Request test failed: %v", err)
 	}
 
-	// 응답 확인
+	// Check response
 	if resp.StatusCode != 200 {
-		t.Errorf("상태 코드가 200이어야 하는데, %d를 받았습니다", resp.StatusCode)
+		t.Errorf("Status code should be 200, but got %d", resp.StatusCode)
 	}
 
-	// JSON 응답 파싱
+	// Parse JSON response
 	var todo TodoResponse
 	err = json.NewDecoder(resp.Body).Decode(&todo)
 	if err != nil {
-		t.Fatalf("JSON 응답 파싱 실패: %v", err)
+		t.Fatalf("Failed to parse JSON response: %v", err)
 	}
 
-	// 예상 응답 필드 검증
+	// Validate expected response fields
 	if todo.UserID != 1 {
-		t.Errorf("UserID는 1이어야 하는데, %d를 받았습니다", todo.UserID)
+		t.Errorf("UserID should be 1, but got %d", todo.UserID)
 	}
 	if todo.ID != 1 {
-		t.Errorf("ID는 1이어야 하는데, %d를 받았습니다", todo.ID)
+		t.Errorf("ID should be 1, but got %d", todo.ID)
 	}
 	if todo.Title != "delectus aut autem" {
-		t.Errorf("제목이 'delectus aut autem'이어야 하는데, '%s'를 받았습니다", todo.Title)
+		t.Errorf("Title should be 'delectus aut autem', but got '%s'", todo.Title)
 	}
 	if todo.Completed != false {
-		t.Errorf("Completed는 false여야 하는데, %t를 받았습니다", todo.Completed)
+		t.Errorf("Completed should be false, but got %t", todo.Completed)
 	}
 
-	// 로그 확인
+	// Check logs
 	logs := logBuf.String()
-	t.Logf("로그 출력: %s", logs)
+	t.Logf("Log output: %s", logs)
 
-	// 필요한 로그 항목이 있는지 확인 - 새로운 로그 형식에 맞춤
+	// Verify required log items are present - adjusted for new log format
 	requiredLogItems := []string{
-		"[프록시][INFO] 요청: 경로=/todos/1",
-		"메서드=GET",
-		"[프록시][DEBUG] 대상 URL: https://jsonplaceholder.typicode.com/todos/1",
-		"[프록시][INFO] 프록시 요청 전송",
-		"응답 수신: 상태=200",
+		"[Proxy][INFO] Request: path=/todos/1",
+		"method=GET",
+		"[Proxy][DEBUG] Target URL: https://jsonplaceholder.typicode.com/todos/1",
+		"[Proxy][INFO] Sending proxy request",
+		"Response received: status=200",
 		"delectus aut autem",
 	}
 
 	for _, item := range requiredLogItems {
 		if !strings.Contains(logs, item) {
-			t.Errorf("로그에 '%s' 항목이 없습니다", item)
+			t.Errorf("Log does not contain '%s' item", item)
 		}
 	}
 }

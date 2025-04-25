@@ -14,7 +14,7 @@ type Gateway struct {
 
 // Handle is handler of Fiber
 func (g *Gateway) Handle(c *fiber.Ctx) error {
-	// 정의해 둔 Routes 중 매칭되는 첫 번째 Route 처리
+	// Process the first matching Route from the defined Routes
 	for _, route := range g.Routes {
 		if route.Match(c) {
 			return route.Serve(c, g.ReverseProxy)
